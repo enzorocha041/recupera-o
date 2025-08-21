@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Segurança Digital & Matemática — Mini Criptografia</title>
+  <meta name="description" content="Página didática que explica como a matemática protege dados (criptografia) e inclui um demo de cifra de César." />
+  <style>
+    :root {
+      --bg: #0f1320;
+      --card: #141a2e;
+      --ink: #e6ebff;
+      --muted: #a1a9c9;
+      --accent: #6c8cff;
+      --accent-2: #21d4a5;
+      --danger: #ff6c8c;
+      --radius: 16px;
+    }
+    * { box-sizing: border-box }
+    html, body { height: 100% }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: radial-gradient(1200px 600px at 10% -10%, #152046 0%, transparent 60%),
+                  radial-gradient(1000px 600px at 100% 0%, #0f2447 0%, transparent 60%),
+                  var(--bg);
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    a { color: var(--accent); text-decoration: none }
+    a:hover { text-decoration: underline }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 32px 20px 64px;
+      display: grid;
+      gap: 24px;
+    }
+
+    header.hero {
+      display: grid;
+      gap: 12px;
+      text-align: center;
+      padding: 28px 20px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, rgba(108,140,255,.12), rgba(33,212,165,.08));
+      border: 1px solid rgba(108,140,255,.25);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    header.hero h1 {
+      margin: 0;
+      font-size: clamp(1.6rem, 3vw, 2.2rem);
+      letter-spacing: .3px;
+    }
+    header.hero p { margin: 0; color: var(--muted) }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 20px;
+    }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,.06); border-radius: var(--radius); box-shadow: 0 8px 20px rgba(0,0,0,.25) }
+    .card .pad { padding: 20px }
+
+    .span-7 { grid-column: span 7 }
+    .span-5 { grid-column: span 5 }
+    @media (max-width: 900px){
+      .span-7, .span-5 { grid-column: 1 / -1 }
+    }
+
+    .badge { display:inline-flex; align-items:center; gap:8px; font-size:.86rem; color:#0a0f1f; background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-radius: 999px; padding: 6px 10px; font-weight: 700 }
+
+    h2 { margin: 0 0 8px }
+    .muted { color: var(--muted) }
+
+    code, kbd, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace }
+    pre { background: #0a0f1f; border-radius: 12px; padding: 12px 14px; overflow:auto; border: 1px dashed rgba(255,255,255,.08) }
+
+    .controls { display:grid; gap:12px; margin: 8px 0 16px }
+    .row { display:flex; gap:12px; flex-wrap:wrap }
+    input[type="text"], input[type="number"], textarea {
+      width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,.12);
+      background: #0b1224; color: var(--ink);
+      outline: none; transition: border .15s ease;
+    }
+    input:focus, textarea:focus { border-color: var(--accent) }
+
+    button {
+      appearance: none; border: none; cursor: pointer; font-weight: 800; letter-spacing:.3px;
+      padding: 12px 16px; border-radius: 12px; background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #051227; box-shadow: 0 8px 18px rgba(33, 212, 165, .18);
+    }
+    button.secondary { background: #0b1224; color: var(--ink); border:1px solid rgba(255,255,255,.12) }
+
+    .pill { font-weight:700; color: var(--accent-2) }
+    .footer { text-align:center; color: var(--muted); font-size:.9rem }
+
+    .result { border: 1px solid rgba(33,212,165,.35); background: rgba(33,212,165,.06); padding: 14px; border-radius: 12px; word-wrap: break-word }
+
+    .math-step { display:grid; gap:8px; margin-top: 8px }
+    .math-step small { color: var(--muted) }
+  </style>
+</head>
+<body>
+  <!--
+    ✅ Como publicar no GitHub Pages (passo rápido):
+    1) Crie um repositório e adicione este arquivo como "index.html" na raiz.
+    2) Commit > Settings > Pages > Source: "Deploy from a branch" > main / (root).
+    3) Aguarde o build e abra a URL indicada.
+  -->
+
+  <div class="container">
+    <header class="hero">
+      <span class="badge">🔐 Segurança Digital + Matemática</span>
+      <h1>Como a Matemática Protege seus Dados (com um demo de criptografia)</h1>
+      <p>Criptografia = transformar <em>mensagens legíveis</em> em <em>códigos</em> usando regras matemáticas. Só quem possui a chave consegue voltar ao texto original.</p>
+    </header>
+
+    <main class="grid" role="main">
+      <section class="card span-7" aria-labelledby="intro-title">
+        <div class="pad">
+          <h2 id="intro-title">Ideia central</h2>
+          <p class="muted">Na internet, seus dados viajam por vários servidores. Para que ninguém leia no caminho, usamos <strong>funções matemáticas</strong> que embaralham o conteúdo. Em sistemas modernos (como HTTPS), entram conceitos como <em>aritmética modular</em>, <em>potenciação</em> e <em>teoria dos números</em>. Aqui vamos ver uma versão simplificada: a <strong>cifra de César</strong>.</p>
+          <h3>Por trás da magia: aritmética modular</h3>
+          <p>Na cifra de César, cada letra vira um número (A=0, B=1, ..., Z=25). Para criptografar, somamos um <em>deslocamento</em> (a chave) e aplicamos <code>mod 26</code> para “voltar” ao início do alfabeto quando passar de Z.</p>
+          <pre><code>novoÍndice = (índiceOriginal + deslocamento) mod 26
+ex.: 'Z' (25) com deslocamento 3 → (25 + 3) mod 26 = 2 → 'C'</code></pre>
+          <p>Descriptografar é o processo inverso:</p>
+          <pre><code>índiceOriginal = (novoÍndice − deslocamento) mod 26</code></pre>
+          <p class="muted">⚠️ Observação: César é didático, mas fraco contra ataques modernos. Sistemas reais usam chaves enormes e operações matemáticas bem mais complexas (ex.: RSA, curvas elípticas).</p>
+        </div>
+      </section>
+
+      <section class="card span-5" aria-labelledby="demo-title">
+        <div class="pad">
+          <h2 id="demo-title">Demo: cifrar uma palavra</h2>
+          <div class="controls">
+            <label>
+              Palavra ou frase
+              <input id="text" type="text" placeholder="Ex.: SEGURANÇA" aria-label="Texto para criptografar" />
+            </label>
+            <div class="row">
+              <label style="flex:1">
+                Deslocamento (0–25)
+                <input id="shift" type="number" min="0" max="25" value="3" aria-label="Valor do deslocamento" />
+              </label>
+              <button id="btn-encrypt" title="Criptografar texto">Criptografar</button>
+              <button id="btn-decrypt" class="secondary" title="Descriptografar texto">Descriptografar</button>
+            </div>
+          </div>
+          <div class="result" id="output" aria-live="polite">Resultado aparecerá aqui 🔎</div>
+          <div class="math-step" id="math-step" hidden>
+            <small>Passo-a-passo da 1ª letra:</small>
+            <div id="math-content"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card span-12" aria-labelledby="estrutura-title">
+        <div class="pad">
+          <h2 id="estrutura-title">Boas práticas de estrutura</h2>
+          <ul>
+            <li>HTML semântico: <code>&lt;header&gt;</code>, <code>&lt;main&gt;</code>, <code>&lt;section&gt;</code>.</li>
+            <li>Organização visual com <code>&lt;div&gt;</code> e classes reutilizáveis (ex.: <code>.card</code>, <code>.grid</code>).</li>
+            <li>Separação de responsabilidades: HTML (estrutura), CSS (estilo), JS (comportamento) — aqui estão juntos por praticidade no GitHub Pages.</li>
+            <li>Acessibilidade: rótulos, <code>aria-*</code> e contraste de cores.</li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <p class="footer">Feito para fins didáticos ✨ — Cifra de César com aritmética modular <span class="pill">mod 26</span>.</p>
+  </div>
+
+  <script>
+    // Utilidades de mapeamento letra <-> índice 0..25
+    const A_CODE = 'A'.charCodeAt(0);
+    const Z_CODE = 'Z'.charCodeAt(0);
+    const a_CODE = 'a'.charCodeAt(0);
+    const z_CODE = 'z'.charCodeAt(0);
+
+    function isLetter(code){
+      return (code >= A_CODE && code <= Z_CODE) || (code >= a_CODE && code <= z_CODE);
+    }
+
+    function shiftChar(code, shift, direction = 1){
+      // direction: 1 = cifrar, -1 = decifrar
+      const isUpper = code >= A_CODE && code <= Z_CODE;
+      const base = isUpper ? A_CODE : a_CODE;
+      const alphaIndex = code - base; // 0..25
+      const moved = (alphaIndex + direction * (shift % 26) + 26) % 26; // mod 26 seguro
+      return base + moved;
+    }
+
+    function caesar(text, shift, mode = 'encrypt'){
+      const dir = mode === 'encrypt' ? 1 : -1;
+      const outCodes = [];
+      for (const ch of text){
+        const code = ch.charCodeAt(0);
+        if (isLetter(code)) {
+          outCodes.push(shiftChar(code, shift, dir));
+        } else {
+          outCodes.push(code); // mantém espaços, números, pontuação
+        }
+      }
+      return String.fromCharCode(...outCodes);
+    }
+
+    function explainFirstStep(text, shift, mode){
+      const dir = mode === 'encrypt' ? 1 : -1;
+      const i = [...text].findIndex(ch => /[A-Za-z]/.test(ch));
+      const box = document.getElementById('math-step');
+      const content = document.getElementById('math-content');
+      if (i === -1){ box.hidden = true; return }
+      const ch = text[i];
+      const code = ch.charCodeAt(0);
+      const isUpper = code >= A_CODE && code <= Z_CODE;
+      const base = isUpper ? A_CODE : a_CODE;
+      const idx = code - base;
+      const moved = (idx + dir * (shift % 26) + 26) % 26;
+      const newChar = String.fromCharCode(base + moved);
+      content.innerHTML = `
+        <code>'${ch}' → índice ${idx}</code><br>
+        <code>(${idx} ${dir>0?'+':'−'} ${shift%26}) mod 26 = ${moved}</code><br>
+        <code>→ '${newChar}'</code>
+      `;
+      box.hidden = false;
+    }
+
+    // Liga os botões
+    const $text = document.getElementById('text');
+    const $shift = document.getElementById('shift');
+    const $out = document.getElementById('output');
+
+    document.getElementById('btn-encrypt').addEventListener('click', () => {
+      const t = $text.value || '';
+      const s = Math.max(0, Math.min(25, parseInt($shift.value || 0, 10)));
+      const res = caesar(t, s, 'encrypt');
+      $out.textContent = res || 'Nada para mostrar ainda 🙂';
+      explainFirstStep(t, s, 'encrypt');
+    });
+
+    document.getElementById('btn-decrypt').addEventListener('click', () => {
+      const t = $text.value || '';
+      const s = Math.max(0, Math.min(25, parseInt($shift.value || 0, 10)));
+      const res = caesar(t, s, 'decrypt');
+      $out.textContent = res || 'Nada para mostrar ainda 🙂';
+      explainFirstStep(t, s, 'decrypt');
+    });
+
+    // Demo amigável ao carregar
+    window.addEventListener('DOMContentLoaded', () => {
+      $text.value = 'SEGURANÇA DIGITAL';
+      $shift.value = 3;
+    });
+  </script>
+</body>
+</html>
